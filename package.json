@@ -11,5 +11,8 @@
     "url": "git+https://github.com/lamritha/fragments-ui.git"
   },
   "author": "Amritha Lingeswaran",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "prettier": "3.8.3"
+  }
 }
