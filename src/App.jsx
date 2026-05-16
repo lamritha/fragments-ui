@@ -1,6 +1,8 @@
 import Header from './components/Header';
 import AuthButton from './components/AuthButton';
 import UserSection from './components/UserSection';
+import { getUserFragments } from './api';
+import { useEffect } from 'react';
 
 import './styles/app.css';
 
@@ -8,7 +10,18 @@ import { useAuth } from 'react-oidc-context';
 
 export default function App() {
   const auth = useAuth();
-  console.log(auth.user);
+  useEffect(() => {
+  async function loadFragments() {
+    if (auth.isAuthenticated && auth.user) {
+      const fragments =
+        await getUserFragments(auth.user);
+
+      console.log(fragments);
+    }
+  }
+
+  loadFragments();
+}, [auth.isAuthenticated]);
 
   const signOutRedirect = () => {
     const clientId =
