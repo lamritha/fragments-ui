@@ -1,0 +1,44 @@
+.app-container {
+  max-width: 600px;
+  margin: 4rem auto;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.app-title {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5rem 0 2rem;
+}
+
+button {
+  background-color: #222;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #444;
+}
+
+.user-section {
+  background-color: #f0f7ff;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.user-name {
+  text-align: center;
+}
