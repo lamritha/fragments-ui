@@ -41,7 +41,7 @@ Clone the repository:
 ```bash
 git clone <your-repo-url>
 cd fragments-ui
-````
+```
 
 Install dependencies:
 
@@ -105,3 +105,4 @@ The JWT ID token is included in the Authorization header as a Bearer token.
 - Ensure the Fragments backend server is running on port 8080
 - Ensure Cognito callback and logout URLs are configured correctly
 - Restart the Vite server after modifying `.env`
+````
