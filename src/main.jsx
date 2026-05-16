@@ -1,10 +1,25 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+import App from './App.jsx';
+
+import { AuthProvider } from 'react-oidc-context';
+
+const cognitoAuthConfig = {
+  authority:
+    `https://cognito-idp.us-east-2.amazonaws.com/${import.meta.env.VITE_AWS_COGNITO_POOL_ID}`,
+
+  client_id: import.meta.env.VITE_AWS_COGNITO_CLIENT_ID,
+
+  redirect_uri: import.meta.env.VITE_OAUTH_SIGN_IN_REDIRECT_URL,
+
+  response_type: 'code',
+
+  scope: 'email openid phone',
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <AuthProvider {...cognitoAuthConfig}>
     <App />
-  </StrictMode>,
-)
+  </AuthProvider>
+);
