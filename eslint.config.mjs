@@ -1,3 +1,4 @@
+// ESLint flat config for React + browser globals
 import js from '@eslint/js';
 import globals from 'globals';
 import pluginReact from 'eslint-plugin-react';

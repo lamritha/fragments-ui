@@ -1,3 +1,4 @@
+// Entry point — wraps the app in Cognito OIDC auth (authorization code flow)
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
