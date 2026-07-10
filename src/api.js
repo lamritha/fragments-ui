@@ -1,10 +1,11 @@
 // HTTP client for the fragments microservice (VITE_API_URL defaults to localhost:8080)
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-// GET /v1/fragments — returns { status, fragments: [id, ...] }
-export async function getUserFragments(user) {
+export async function getUserFragments(user, expand = false) {
   try {
-    const res = await fetch(new URL('/v1/fragments', apiUrl), {
+    const url = new URL('/v1/fragments', apiUrl);
+    if (expand) url.searchParams.set('expand', '1');
+    const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${user.id_token}`,
       },
@@ -12,20 +13,20 @@ export async function getUserFragments(user) {
     if (!res.ok) {
       throw new Error(`${res.status} ${res.statusText}`);
     }
-    return await res.json();
+    const data = await res.json();
+    return data;
   } catch (err) {
     console.error('Unable to call GET /v1/fragments', { err });
   }
 }
 
-// POST /v1/fragments — create a text/plain fragment from raw body
-export async function createFragment(user, text) {
+export async function createFragment(user, text, contentType = 'text/plain') {
   try {
     const res = await fetch(new URL('/v1/fragments', apiUrl), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${user.id_token}`,
-        'Content-Type': 'text/plain',
+        'Content-Type': contentType,
       },
       body: text,
     });

@@ -1,4 +1,3 @@
-// Main view — auth, fragment creation, and fragment list
 import { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import Header from './components/Header';
@@ -7,17 +6,25 @@ import UserSection from './components/UserSection';
 import { getUserFragments, createFragment } from './api';
 import './styles/app.css';
 
+const SUPPORTED_TYPES = [
+  'text/plain',
+  'text/markdown',
+  'text/html',
+  'text/csv',
+  'application/json',
+];
+
 export default function App() {
   const auth = useAuth();
   const [fragments, setFragments] = useState([]);
   const [text, setText] = useState('');
+  const [contentType, setContentType] = useState('text/plain');
   const [status, setStatus] = useState('');
 
-  // Load fragment ids when the user logs in
   useEffect(() => {
     async function loadFragments() {
       if (auth.isAuthenticated && auth.user) {
-        const data = await getUserFragments(auth.user);
+        const data = await getUserFragments(auth.user, true);
         if (data?.fragments) {
           setFragments(data.fragments);
         }
@@ -26,7 +33,6 @@ export default function App() {
     loadFragments();
   }, [auth.isAuthenticated, auth.user]);
 
-  // Redirect to Cognito hosted UI to clear the server-side session
   const signOutRedirect = () => {
     const clientId = import.meta.env.VITE_AWS_COGNITO_CLIENT_ID;
     const logoutUri = import.meta.env.VITE_OAUTH_SIGN_OUT_REDIRECT_URL;
@@ -35,25 +41,23 @@ export default function App() {
   };
 
   const handleCreateFragment = async () => {
-    if (!text.trim()) return;
-    const result = await createFragment(auth.user, text);
+    if (!text.trim()) {
+      setStatus('Please enter some content before saving.');
+      return;
+    }
+    const result = await createFragment(auth.user, text, contentType);
     if (result) {
       setStatus(`Fragment created: ${result.fragment.id}`);
       setText('');
-      const data = await getUserFragments(auth.user);
+      const data = await getUserFragments(auth.user, true);
       if (data?.fragments) {
         setFragments(data.fragments);
       }
     }
   };
 
-  if (auth.isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (auth.error) {
-    return <div>Encountering error... {auth.error.message}</div>;
-  }
+  if (auth.isLoading) return <div>Loading...</div>;
+  if (auth.error) return <div>Encountering error... {auth.error.message}</div>;
 
   return (
     <div className="app-container">
@@ -81,10 +85,26 @@ export default function App() {
       {auth.isAuthenticated && (
         <div className="fragments-section">
           <h2>Create Fragment</h2>
+
+          <div className="type-selector">
+            <label htmlFor="content-type">Type</label>
+            <select
+              id="content-type"
+              value={contentType}
+              onChange={(e) => setContentType(e.target.value)}
+            >
+              {SUPPORTED_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Enter text fragment..."
+            placeholder={`Enter ${contentType} content...`}
             rows={4}
           />
           <button className="primary" onClick={handleCreateFragment}>
@@ -97,8 +117,15 @@ export default function App() {
             <p className="empty-state">No fragments yet.</p>
           ) : (
             <div className="fragments-list">
-              {fragments.map((id) => (
-                <div className="fragment-item" key={id}>{id}</div>
+              {fragments.map((fragment) => (
+                <div className="fragment-item" key={fragment.id}>
+                  <div className="fragment-id">{fragment.id}</div>
+                  <div className="fragment-meta">
+                    <span>{fragment.type}</span>
+                    <span>{fragment.size} bytes</span>
+                    <span>{new Date(fragment.created).toLocaleString()}</span>
+                  </div>
+                </div>
               ))}
             </div>
           )}

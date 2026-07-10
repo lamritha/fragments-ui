@@ -2,7 +2,9 @@
 
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -10,7 +12,11 @@
 
 body {
   background-color: #f8fafc;
-  background-image: radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
+  background-image: radial-gradient(
+    ellipse at 20% 0%,
+    rgba(99, 102, 241, 0.06) 0%,
+    transparent 60%
+  );
   min-height: 100vh;
   font-family: 'IBM Plex Sans', sans-serif;
   color: #1e293b;
@@ -85,7 +91,7 @@ button.primary:hover {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .user-section::before {
@@ -135,7 +141,7 @@ textarea {
   transition: border-color 0.15s ease;
   display: block;
   margin-bottom: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 textarea:focus {
@@ -174,7 +180,7 @@ textarea::placeholder {
   border-radius: 6px;
   letter-spacing: 0.02em;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .fragment-item:hover {
@@ -191,4 +197,44 @@ textarea::placeholder {
   padding: 2.5rem;
   border: 1px dashed #e2e8f0;
   border-radius: 8px;
+}
+
+.type-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.type-selector label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.type-selector select {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: #1e293b;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+}
+
+.fragment-id {
+  font-size: 0.75rem;
+  color: #475569;
+  margin-bottom: 0.3rem;
+}
+
+.fragment-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.7rem;
+  color: #94a3b8;
 }
