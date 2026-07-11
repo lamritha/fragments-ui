@@ -1,6 +1,6 @@
 # fragments-ui
 
-React + Vite frontend for the [Fragments](https://github.com/lamritha/fragments) microservice. Authenticated users sign in with Amazon Cognito and interact with the Fragments API to create and list text fragments.
+React + Vite frontend for the [Fragments](https://github.com/lamritha/fragments) microservice. Authenticated users sign in with Amazon Cognito and interact with the Fragments API to create and list text and JSON fragments.
 
 ---
 
@@ -9,6 +9,7 @@ React + Vite frontend for the [Fragments](https://github.com/lamritha/fragments)
 - Node.js 20+
 - npm
 - Git
+- Docker (for containerized builds)
 - A running [Fragments API](https://github.com/lamritha/fragments) server configured with the same Amazon Cognito User Pool
 - An Amazon Cognito app client with OAuth callback and sign-out URLs configured for this app
 
@@ -18,21 +19,27 @@ React + Vite frontend for the [Fragments](https://github.com/lamritha/fragments)
 
 - Sign in and sign out via Amazon Cognito Hosted UI (OIDC Authorization Code flow)
 - Display the authenticated user's Cognito username
-- List the user's fragment IDs from `GET /v1/fragments`
-- Create new `text/plain` fragments via `POST /v1/fragments`
+- List the user's existing fragments with full metadata (ID, type, size, created date) from `GET /v1/fragments?expand=1`
+- Create new fragments via `POST /v1/fragments` with a content-type dropdown supporting:
+  - `text/plain`
+  - `text/markdown`
+  - `text/html`
+  - `text/csv`
+  - `application/json`
 - Send authenticated API requests using the Cognito **ID token** as a Bearer token
 
 ---
 
 ## Technologies
 
-| Tool | Purpose |
-|------|---------|
-| React 19 | UI framework |
-| Vite 8 | Dev server and production build |
-| react-oidc-context | React bindings for OIDC authentication |
-| oidc-client-ts | OIDC client (Authorization Code flow) |
-| Fetch API | HTTP client for the Fragments API |
+| Tool               | Purpose                                           |
+| ------------------ | ------------------------------------------------- |
+| React 19           | UI framework                                      |
+| Vite 8             | Dev server and production build                   |
+| react-oidc-context | React bindings for OIDC authentication            |
+| oidc-client-ts     | OIDC client (Authorization Code flow)             |
+| Fetch API          | HTTP client for the Fragments API                 |
+| nginx              | Static file server in the production Docker image |
 
 ---
 
@@ -51,6 +58,8 @@ src/
     app.css             # Application styles
 index.html              # HTML shell
 vite.config.js          # Vite config (dev server on port 5174)
+Dockerfile              # Multi-stage build: Node (build) + nginx (serve)
+.dockerignore           # Files excluded from the Docker build context
 ```
 
 ---
@@ -96,18 +105,18 @@ VITE_OAUTH_SIGN_OUT_REDIRECT_URL=http://localhost:5174
 VITE_AWS_COGNITO_DOMAIN=https://your-domain.auth.us-east-2.amazoncognito.com
 ```
 
-All variables are exposed to the client via Vite's `import.meta.env` — do not put secrets in `.env`.
+All variables are exposed to the client via Vite's `import.meta.env`. The `VITE_API_URL` value is **baked into the static build at build time** — rebuild the app (or Docker image) when changing the API URL.
 
 ### Environment variable reference
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_API_URL` | No | Base URL of the Fragments API (default `http://localhost:8080`) |
-| `VITE_AWS_COGNITO_POOL_ID` | Yes | Amazon Cognito User Pool ID |
-| `VITE_AWS_COGNITO_CLIENT_ID` | Yes | Cognito app client ID |
-| `VITE_OAUTH_SIGN_IN_REDIRECT_URL` | Yes | OAuth callback URL after sign-in (must match Cognito config exactly) |
-| `VITE_OAUTH_SIGN_OUT_REDIRECT_URL` | Yes | Redirect URL after sign-out (must match Cognito config exactly) |
-| `VITE_AWS_COGNITO_DOMAIN` | Yes | Cognito Hosted UI domain for the logout endpoint |
+| Variable                           | Required | Description                                                          |
+| ---------------------------------- | -------- | -------------------------------------------------------------------- |
+| `VITE_API_URL`                     | No       | Base URL of the Fragments API (default `http://localhost:8080`)      |
+| `VITE_AWS_COGNITO_POOL_ID`         | Yes      | Amazon Cognito User Pool ID                                          |
+| `VITE_AWS_COGNITO_CLIENT_ID`       | Yes      | Cognito app client ID                                                |
+| `VITE_OAUTH_SIGN_IN_REDIRECT_URL`  | Yes      | OAuth callback URL after sign-in (must match Cognito config exactly) |
+| `VITE_OAUTH_SIGN_OUT_REDIRECT_URL` | Yes      | Redirect URL after sign-out (must match Cognito config exactly)      |
+| `VITE_AWS_COGNITO_DOMAIN`          | Yes      | Cognito Hosted UI domain for the logout endpoint                     |
 
 Restart the Vite dev server after changing `.env`.
 
@@ -129,12 +138,42 @@ Ensure the Fragments backend is running and configured with the same Cognito Use
 
 ## Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start the Vite development server on port 5174 |
-| `npm run build` | Build the app for production (output in `dist/`) |
-| `npm run preview` | Serve the production build locally |
-| `npm run lint` | Run ESLint on the project |
+| Script            | Description                                      |
+| ----------------- | ------------------------------------------------ |
+| `npm run dev`     | Start the Vite development server on port 5174   |
+| `npm run build`   | Build the app for production (output in `dist/`) |
+| `npm run preview` | Serve the production build locally               |
+| `npm run lint`    | Run ESLint on the project                        |
+
+---
+
+## Docker
+
+The app is containerized using a multi-stage Docker build. The first stage builds the static assets using Node.js and the second stage serves them with nginx on port 80.
+
+### Build the image
+
+Set the correct `VITE_API_URL` in `.env` before building — it is baked into the static output at build time.
+
+```bash
+docker build -t fragments-ui:latest .
+```
+
+### Run the container
+
+```bash
+docker run --rm -p 8080:80 fragments-ui:latest
+```
+
+The app will be available at `http://localhost:8080`.
+
+### Docker Hub
+
+The image is published to Docker Hub:
+
+```bash
+docker pull lamritha/fragments-ui:latest
+```
 
 ---
 
@@ -181,14 +220,14 @@ API calls are defined in `src/api.js`. All requests include the Cognito **ID tok
 Authorization: Bearer <id-token>
 ```
 
-| Function | Method | Endpoint | Description |
-|----------|--------|----------|-------------|
-| `getUserFragments(user)` | `GET` | `/v1/fragments` | Fetch the authenticated user's fragment IDs |
-| `createFragment(user, text)` | `POST` | `/v1/fragments` | Create a new `text/plain` fragment from the given text |
+| Function                                  | Method | Endpoint                                    | Description                                                                                |
+| ----------------------------------------- | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `getUserFragments(user, expand)`          | `GET`  | `/v1/fragments` or `/v1/fragments?expand=1` | Fetch the authenticated user's fragments. Pass `expand=true` to get full metadata objects. |
+| `createFragment(user, text, contentType)` | `POST` | `/v1/fragments`                             | Create a new fragment with the given content and content type.                             |
 
-On login, `App.jsx` automatically loads the user's fragments. After creating a fragment, the list is refreshed and a status message shows the new fragment ID.
+On login, `App.jsx` automatically loads the user's fragments with full metadata. After creating a fragment, the list is refreshed and a status message shows the new fragment ID.
 
-API errors are logged to the browser console; the UI does not currently display API error messages to the user.
+API errors are logged to the browser console.
 
 ---
 
@@ -206,7 +245,7 @@ Preview the production build locally:
 npm run preview
 ```
 
-When deploying, set the `VITE_*` environment variables to your production API URL and Cognito settings, and update Cognito callback/sign-out URLs to match your deployed domain.
+When deploying, set the `VITE_*` environment variables to your production API URL and Cognito settings **before running the build**, and update Cognito callback/sign-out URLs to match your deployed domain.
 
 ---
 
@@ -214,5 +253,5 @@ When deploying, set the `VITE_*` environment variables to your production API UR
 
 - The Fragments backend must be running and configured with matching `AWS_COGNITO_POOL_ID` and `AWS_COGNITO_CLIENT_ID` values.
 - CORS is enabled on the Fragments API, so browser requests from this app are allowed cross-origin.
-- Only `text/plain` fragment creation is supported in the UI currently; the backend supports additional MIME types.
-- `src/index.css` is unused — all styles live in `src/styles/app.css`.
+- `VITE_API_URL` is baked into the static build — rebuilding is required when changing the target API server.
+- All styles live in `src/styles/app.css`.
