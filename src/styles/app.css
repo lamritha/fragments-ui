@@ -238,3 +238,95 @@ textarea::placeholder {
   font-size: 0.7rem;
   color: #94a3b8;
 }
+
+.file-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+}
+
+.fragment-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.fragment-actions button {
+  font-size: 0.7rem;
+  padding: 0.3rem 0.6rem;
+}
+
+button.danger {
+  color: #dc2626;
+  border-color: #fca5a5;
+  background: #fff5f5;
+}
+
+button.danger:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+
+.fragment-view {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.fragment-view-data {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  color: #334155;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+.convert-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.convert-section label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.convert-section select {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: #1e293b;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+}
+
+.convert-result {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+}
+
+.edit-section {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
